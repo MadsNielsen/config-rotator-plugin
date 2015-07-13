@@ -11,21 +11,35 @@ public class ClearCaseUCMConfigurationComponent extends AbstractConfigurationCom
     private Baseline baseline;
     private PromotionLevel plevel;
 
+    @Deprecated
     public ClearCaseUCMConfigurationComponent( Baseline baseline, PromotionLevel plevel, boolean fixed ) {
         super( fixed );
         this.baseline = baseline;
         this.plevel = plevel;
     }
 
+    @Deprecated
     public ClearCaseUCMConfigurationComponent( String baseline, String plevel, boolean fixed ) throws ClearCaseException {
         super( fixed );
         this.baseline = Baseline.get( baseline ).load();
         this.plevel = Project.PromotionLevel.valueOf( plevel );
     }
     
+    public ClearCaseUCMConfigurationComponent( Baseline baseline, PromotionLevel plevel, Incrementor incrementor ) {
+        super( incrementor );
+        this.baseline = baseline;
+        this.plevel = plevel;
+    }
+    
+    public ClearCaseUCMConfigurationComponent( Baseline baseline, String plevel, Incrementor incrementor ) {
+        super( incrementor );
+        this.baseline = baseline;
+        this.plevel = Project.PromotionLevel.valueOf( plevel );
+    }
+    
     @Override
     public ClearCaseUCMConfigurationComponent clone() {
-        ClearCaseUCMConfigurationComponent cc = new ClearCaseUCMConfigurationComponent( this.baseline, this.plevel, this.fixed );
+        ClearCaseUCMConfigurationComponent cc = new ClearCaseUCMConfigurationComponent( this.baseline, this.plevel, this.getIncrementor());
         return cc;
     }
 
@@ -60,7 +74,7 @@ public class ClearCaseUCMConfigurationComponent extends AbstractConfigurationCom
         if( other instanceof ClearCaseUCMConfigurationComponent ) {
             ClearCaseUCMConfigurationComponent o = (ClearCaseUCMConfigurationComponent) other;
 
-            return ( o.baseline.equals( baseline ) && ( o.plevel.equals( plevel ) ) && ( o.isFixed() == fixed ) );
+            return ( o.baseline.equals( baseline ) && ( o.plevel.equals( plevel ) ) && ( o.getIncrementor() == getIncrementor() ) );
         } else {
             return false;
         }

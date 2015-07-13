@@ -21,6 +21,7 @@ import net.praqma.clearcase.exceptions.UCMEntityNotInitializedException;
 import net.praqma.clearcase.ucm.entities.Baseline;
 import net.praqma.clearcase.ucm.entities.Component;
 import net.praqma.clearcase.ucm.entities.Project;
+import net.praqma.clearcase.ucm.utils.BaselineList;
 import net.praqma.clearcase.ucm.view.SnapshotView;
 import net.praqma.jenkins.configrotator.*;
 import net.praqma.jenkins.configrotator.scm.ConfigRotatorChangeLogEntry;
@@ -295,7 +296,12 @@ public class ClearCaseUCM extends AbstractConfigurationRotatorSCM implements Ser
 
                 try {
                     //current = workspace.act( new GetBaselines( listener, config.getBaseline().getComponent(), config.getBaseline().getStream(), config.getPlevel(), 1, config.getBaseline() ) ).get( 0 ); //.get(0) newest baseline, they are sorted!
-                    current = workspace.act( new NextBaseline( config.getBaseline().getStream(), config.getBaseline().getComponent(), config.getPlevel(), config.getBaseline() ) );
+                    if(config.getIncrementor() == Incrementor.NEWEST) {
+                        current = workspace.act( new NextBaseline( config.getBaseline().getStream(), config.getBaseline().getComponent(), config.getPlevel(), config.getBaseline(), new BaselineList.DescendingDateSort() ) );
+                        logger.log(Level.FINE,String.format("%sUsing newest found the following: %s",ConfigurationRotator.LOGGERNAME, current ) );
+                    } else {
+                        current = workspace.act( new NextBaseline( config.getBaseline().getStream(), config.getBaseline().getComponent(), config.getPlevel(), config.getBaseline(), new BaselineList.AscendingDateSort() ) );
+                    }
 
                     current = (Baseline) RemoteUtil.loadEntity( workspace, current, true );
                     if( oldest == null || current.getDate().before( oldest.getDate() ) ) {
@@ -366,8 +372,8 @@ public class ClearCaseUCM extends AbstractConfigurationRotatorSCM implements Ser
         if( config.getList() != null && config.getList().size() > 0 ) {
             for( ClearCaseUCMConfigurationComponent c : config.getList() ) {
                 if( c != null ) {                    
-                    list.add( new ClearCaseUCMTarget( c.getBaseline().getNormalizedName(), c.getPlevel(), c.isFixed() ) );
-                } else {
+                    list.add( new ClearCaseUCMTarget( c.getBaseline().getNormalizedName(), c.getPlevel(), c.getIncrementor() ) );
+                } else { 
                     /* A null!? The list is corrupted, return targets */
                     return targets;
                 }
@@ -457,6 +463,10 @@ public class ClearCaseUCM extends AbstractConfigurationRotatorSCM implements Ser
 
         public Project.PromotionLevel[] getPromotionLevels() {
             return Project.PromotionLevel.values();
+        }
+        
+        public Incrementor[] getIncrementors() {
+            return Incrementor.values();
         }
 
 

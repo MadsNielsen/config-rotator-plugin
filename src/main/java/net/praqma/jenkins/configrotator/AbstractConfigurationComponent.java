@@ -20,8 +20,17 @@ import java.util.List;
  */
 public abstract class AbstractConfigurationComponent implements Serializable, Feedable {
     protected boolean changedLast = false;
-    protected boolean fixed = false;
+    
+    @Deprecated
+    protected transient boolean fixed = false;
+    
+    private Incrementor incrementor;
+    
+    public AbstractConfigurationComponent( Incrementor incrementor ) {
+        this.incrementor = incrementor;
+    }
 
+    @Deprecated
     public AbstractConfigurationComponent( boolean fixed ) {
         this.fixed = fixed;
     }
@@ -35,7 +44,11 @@ public abstract class AbstractConfigurationComponent implements Serializable, Fe
     }
 
     public boolean isFixed() {
-        return fixed;
+        if(incrementor != null) {
+            return incrementor == Incrementor.FIXED;
+        } else {
+            return fixed;
+        }
     }
 
     public abstract String getComponentName();
@@ -82,6 +95,20 @@ public abstract class AbstractConfigurationComponent implements Serializable, Fe
         entry.content += configuration.toHtml() + br1 + linkFeeds + br2 + joblink;
 
         return entry;
+    }
+
+    /**
+     * @return the incrementor
+     */
+    public Incrementor getIncrementor() {
+        return incrementor;
+    }
+
+    /**
+     * @param incrementor the incrementor to set
+     */
+    public void setIncrementor(Incrementor incrementor) {
+        this.incrementor = incrementor;
     }
 
     public static class Element {

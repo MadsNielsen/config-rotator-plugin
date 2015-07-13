@@ -17,11 +17,11 @@
 
                 <tbody>
 			 		<tr>
-                        <td align="left" style="min-width:200px">
+                        <td align="left" style="min-width:250px">
                             ${%Baseline}
                         	<f:textbox name="cc.target.baselineName" value="${targets.baselineName}"/>                            
                         </td>
-                        <td align="left" style="min-width:100px">
+                        <td align="middle" style="min-width:100px">
                             ${%Promotion level}
                             <select name="cc.target.level">
                                 <j:forEach var="availableLevel" items="${descriptor.getPromotionLevels()}">
@@ -29,9 +29,13 @@
                                 </j:forEach>
                             </select>
                         </td>
-                        <td align="center">
-                            ${%Fixed}
-                            <f:checkbox name="cc.target.fixed" checked="${targets.fixed}"/>                    
+                        <td align="left" style="min-width:100px">
+                            ${%Incrementor}
+                            <select name="cc.target.incrementor">
+                                <j:forEach var="incrementor" items="${descriptor.getIncrementors()}">
+                                   <f:option selected="${targets.incrementor.equals(incrementor)}" value="${incrementor}">${incrementor}</f:option>
+                                </j:forEach>
+                            </select>
                         </td>
                         <td style="vertical-align:middle">
                             <f:repeatableDeleteButton/>

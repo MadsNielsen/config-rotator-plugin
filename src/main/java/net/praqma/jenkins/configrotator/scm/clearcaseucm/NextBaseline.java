@@ -13,6 +13,8 @@ import net.praqma.clearcase.ucm.utils.filters.NoLabels;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
+import net.praqma.clearcase.ucm.utils.BaselineFilter;
 
 /**
  * @author cwolfgang
@@ -23,12 +25,14 @@ public class NextBaseline implements FilePath.FileCallable<Baseline> {
     private Component component;
     private Project.PromotionLevel level;
     private Baseline offset;
-
-    public NextBaseline( Stream stream, Component component, Project.PromotionLevel level, Baseline offset ) {
+    private Comparator<Baseline> sorting;
+    
+    public NextBaseline( Stream stream, Component component, Project.PromotionLevel level, Baseline offset, Comparator<Baseline> sorting ) {
         this.stream = stream;
         this.component = component;
         this.level = level;
         this.offset = offset;
+        this.sorting = sorting;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class NextBaseline implements FilePath.FileCallable<Baseline> {
                 addFilter( new AfterBaseline( offset ) ).
                 addFilter( new NoDeliver() ).
                 addFilter( new NoLabels() ).
-                setSorting( new BaselineList.AscendingDateSort() ).                
+                setSorting( sorting ).                
                 setLimit( 1 );
 
         try {

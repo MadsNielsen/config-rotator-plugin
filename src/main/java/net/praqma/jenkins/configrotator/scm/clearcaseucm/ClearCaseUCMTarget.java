@@ -2,6 +2,7 @@ package net.praqma.jenkins.configrotator.scm.clearcaseucm;
 
 import net.praqma.clearcase.ucm.entities.Project;
 import net.praqma.jenkins.configrotator.AbstractTarget;
+import net.praqma.jenkins.configrotator.Incrementor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class ClearCaseUCMTarget extends AbstractTarget {
@@ -9,7 +10,11 @@ public class ClearCaseUCMTarget extends AbstractTarget {
     private String component;
     private String baselineName;
     private Project.PromotionLevel level;
-    private boolean fixed;
+    
+    @Deprecated
+    private transient boolean fixed;
+    
+    private Incrementor incrementor;
 
     public ClearCaseUCMTarget() {
     }
@@ -32,13 +37,33 @@ public class ClearCaseUCMTarget extends AbstractTarget {
      * @param level
      * @param fixed
      */
-    @DataBoundConstructor
+    
+    @Deprecated
     public ClearCaseUCMTarget(String baselineName, Project.PromotionLevel level, boolean fixed) {
         this.component = baselineName + ", " + level + ", " + fixed;
         this.baselineName = baselineName;
         this.level = level;
         this.fixed = fixed;
+        this.incrementor = fixed ? Incrementor.FIXED : Incrementor.NEXT;
     }
+    
+    @DataBoundConstructor
+    public ClearCaseUCMTarget(String baselineName, Project.PromotionLevel level, String incrementor) {
+        this.component = baselineName + ", " + level + ", " + fixed;
+        this.baselineName = baselineName;
+        this.level = level;
+        this.incrementor = Incrementor.valueOf(incrementor.toUpperCase());
+        this.fixed = this.incrementor == Incrementor.FIXED;
+    }
+    
+    public ClearCaseUCMTarget(String baselineName, Project.PromotionLevel level, Incrementor incrementor) {
+        this.component = baselineName + ", " + level + ", " + fixed;
+        this.baselineName = baselineName;
+        this.level = level;
+        this.incrementor = incrementor;
+        this.fixed = this.incrementor == Incrementor.FIXED;
+    }
+    
 
     public String getComponent() {
         return component;
@@ -65,6 +90,9 @@ public class ClearCaseUCMTarget extends AbstractTarget {
     }
 
     public boolean getFixed() {
+        if(incrementor != null) {
+            return incrementor == Incrementor.FIXED; 
+        }  
         return fixed;
     }
 
@@ -90,5 +118,19 @@ public class ClearCaseUCMTarget extends AbstractTarget {
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return the incrementor
+     */
+    public Incrementor getIncrementor() {
+        return incrementor;
+    }
+
+    /**
+     * @param incrementor the incrementor to set
+     */
+    public void setIncrementor(Incrementor incrementor) {
+        this.incrementor = incrementor;
     }
 }
